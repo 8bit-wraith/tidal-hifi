@@ -61,6 +61,10 @@ export const addSettingsAPI = (expressApp: Router, mainWindow: BrowserWindow) =>
    *         description: Ok
    */
   expressApp.post("/settings/skipped-artists", (req: Request<object, object, string[]>, res) => {
+    if (!Array.isArray(req.body) || !req.body.every((artist) => typeof artist === "string")) {
+      res.status(400).json({ error: "Expected an array of artist names" });
+      return;
+    }
     addSkippedArtists(req.body);
     res.sendStatus(200);
   });
@@ -84,6 +88,10 @@ export const addSettingsAPI = (expressApp: Router, mainWindow: BrowserWindow) =>
   expressApp.post(
     "/settings/skipped-artists/delete",
     (req: Request<object, object, string[]>, res) => {
+      if (!Array.isArray(req.body) || !req.body.every((artist) => typeof artist === "string")) {
+        res.status(400).json({ error: "Expected an array of artist names" });
+        return;
+      }
       removeSkippedArtists(req.body);
       res.sendStatus(200);
     }
