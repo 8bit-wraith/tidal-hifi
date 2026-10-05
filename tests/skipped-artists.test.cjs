@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const { stripTypeScriptTypes } = require('node:module');
+const ts = require('typescript');
 
 function fixture() {
   const file = path.join(__dirname, '../src/features/api/features/settings/settings.ts');
@@ -14,7 +14,8 @@ function fixture() {
     removeSkippedArtists: body => mutations.push(['remove', body]),
   };
   vm.createContext(context);
-  vm.runInContext(stripTypeScriptTypes(source) + '\nthis.register = addSettingsAPI;', context);
+  const compiled = ts.transpileModule(source, {compilerOptions: {target: ts.ScriptTarget.ES2020}}).outputText;
+  vm.runInContext(compiled + '\nthis.register = addSettingsAPI;', context);
   const routes = new Map();
   context.register({get() {}, delete() {}, post(url, handler) { routes.set(url, handler); }}, {});
   return {mutations, invoke(url, body) {
